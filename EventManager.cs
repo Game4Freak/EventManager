@@ -23,7 +23,7 @@ namespace Game4Freak.EventManager
     public class EventManager : RocketPlugin<EventManagerConfiguration>
     {
         public static EventManager Instance;
-        public const string VERSION = "0.1.0.0";
+        public const string VERSION = "0.1.1.0";
         private string newVersion = null;
         private bool notifyUpdate = false;
         private int frame = 10;
