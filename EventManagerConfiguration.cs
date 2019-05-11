@@ -6,7 +6,8 @@ namespace Game4Freak.EventManager
 {
     public class EventManagerConfiguration : IRocketPluginConfiguration
     {
-        public bool freeRandomItemPreNotification;
+        public bool freeRandomItemEventPreNotification;
+        public int freeRandomItemEventMinPlayers;
         public string messageColor;
         public bool useRandomEvents;
         public float minutesBetweenEvents;
@@ -20,7 +21,8 @@ namespace Game4Freak.EventManager
 
         public void LoadDefaults()
         {
-            freeRandomItemPreNotification = true;
+            freeRandomItemEventPreNotification = true;
+            freeRandomItemEventMinPlayers = 2;
             messageColor = "cyan";
             useRandomEvents = true;
             minutesBetweenEvents = 2;

@@ -21,7 +21,7 @@ namespace Game4Freak.EventManager
     public class ExampleEvent
     {
         // Setting variables for this EventType
-        private static EventType type = new EventType("freeRandomItem", 2, "<minplayers> <itemIDs[]>", 1);
+        private static EventType type = new EventType("freeRandomItem", 2, "<minplayers> <itemIDs[]>", 2);
 
         public ExampleEvent()
         {
@@ -29,6 +29,7 @@ namespace Game4Freak.EventManager
 
         public void load()
         {
+            type.minPlayers = EventManager.Instance.Configuration.Instance.freeRandomItemEventMinPlayers;
             // Adding EventType to EventManager
             EventManager.Instance.removeEventType(type.id);
             EventManager.Instance.addEventType(type.id, type.minParameterAmount, type.parameters, type.minPlayers);
@@ -47,7 +48,7 @@ namespace Game4Freak.EventManager
         // EventManager.onEventNotification
         private void onEventNotify(Event @event, float secondsBeforeEvent)
         {
-            if (@event.type == type.id && EventManager.Instance.Configuration.Instance.freeRandomItemPreNotification)
+            if (@event.type == type.id && EventManager.Instance.Configuration.Instance.freeRandomItemEventPreNotification)
             {
                 List<float> sortedNotifications = EventManager.Instance.Configuration.Instance.minutesNotificationBefore.OrderBy(i => i).ToList();
                 if (secondsBeforeEvent == sortedNotifications[0] * 60)
