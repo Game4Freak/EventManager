@@ -83,7 +83,7 @@ namespace Game4Freak.EventManager
                     while (!fin)
                     {
                         ushort itemID;
-                        if (ushort.TryParse(parameters[EventManager.Instance.randomNum(0, parameters.Count - 1)], out itemID))
+                        if (ushort.TryParse(parameters[UnityEngine.Random.Range(0, parameters.Count)], out itemID))
                         {
                             player.GiveItem(itemID, 1);
                             UnturnedChat.Say(player, EventManager.Instance.Translate("exampleevent_give_away", @event.name), UnturnedChat.GetColorFromName(EventManager.Instance.Configuration.Instance.messageColor, Color.green));

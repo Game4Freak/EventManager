@@ -23,7 +23,7 @@ namespace Game4Freak.EventManager
     public class EventManager : RocketPlugin<EventManagerConfiguration>
     {
         public static EventManager Instance;
-        public const string VERSION = "0.1.1.1";
+        public const string VERSION = "0.1.2.0";
         private string newVersion = null;
         private bool notifyUpdate = false;
         private int frame = 10;
@@ -33,8 +33,6 @@ namespace Game4Freak.EventManager
         private Event nextEvent;
 
         private ExampleEvent example;
-        
-        private readonly System.Random random = new System.Random();
 
         public delegate void onEventTriggeredHandler(Event @event);
         public static event onEventTriggeredHandler onEventTriggered;
@@ -190,7 +188,7 @@ namespace Game4Freak.EventManager
                 bool triggered = false;
                 while (!triggered)
                 {
-                    Event triggerEvent = events[randomNum(0, events.Count - 1)];
+                    Event triggerEvent = events[UnityEngine.Random.Range(0, events.Count)];
                     if (Provider.clients.Count >= getEventTypeByID(triggerEvent.type).minPlayers)
                     {
                         nextEvent = triggerEvent;
@@ -272,11 +270,6 @@ namespace Game4Freak.EventManager
                 return;
             Configuration.Instance.eventTypes.Remove(getEventTypeByID(id));
             Configuration.Save();
-        }
-
-        public int randomNum(int min, int max)
-        {
-            return random.Next(min, max);
         }
 
         public void resetSendNotifications()
