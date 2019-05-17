@@ -73,10 +73,10 @@ namespace Game4Freak.EventManager
                     }
                 }
                 Int32 currentUnixTimestamp = EventManager.getCurrentTime();
-                if ((EventManager.Instance.Configuration.Instance.minutesBetweenEvents * 60 - (currentUnixTimestamp - EventManager.Instance.lastUnixTimestamp)) >= 180)
-                    UnturnedChat.Say(caller, EventManager.Instance.Translate("next_event_minutes", (int)(EventManager.Instance.Configuration.Instance.minutesBetweenEvents * 60 - (currentUnixTimestamp - EventManager.Instance.lastUnixTimestamp)) / 60), UnturnedChat.GetColorFromName(EventManager.Instance.Configuration.Instance.messageColor, Color.green));
+                if ((EventManager.Instance.Configuration.Instance.minutesBetweenEvents * 60 - (currentUnixTimestamp - EventManager.Instance.Configuration.Instance.lastEventUnixTime)) >= 180)
+                    UnturnedChat.Say(caller, EventManager.Instance.Translate("next_event_minutes", (int)(EventManager.Instance.Configuration.Instance.minutesBetweenEvents * 60 - (currentUnixTimestamp - EventManager.Instance.Configuration.Instance.lastEventUnixTime)) / 60), UnturnedChat.GetColorFromName(EventManager.Instance.Configuration.Instance.messageColor, Color.green));
                 else
-                    UnturnedChat.Say(caller, EventManager.Instance.Translate("next_event_seconds", (EventManager.Instance.Configuration.Instance.minutesBetweenEvents * 60 - (currentUnixTimestamp - EventManager.Instance.lastUnixTimestamp))), UnturnedChat.GetColorFromName(EventManager.Instance.Configuration.Instance.messageColor, Color.green));
+                    UnturnedChat.Say(caller, EventManager.Instance.Translate("next_event_seconds", (EventManager.Instance.Configuration.Instance.minutesBetweenEvents * 60 - (currentUnixTimestamp - EventManager.Instance.Configuration.Instance.lastEventUnixTime))), UnturnedChat.GetColorFromName(EventManager.Instance.Configuration.Instance.messageColor, Color.green));
                 return;
             }
             else if (command[0].ToLower() == "forcenext")
@@ -113,7 +113,8 @@ namespace Game4Freak.EventManager
                         return;
                     }
                 }
-                EventManager.Instance.lastUnixTimestamp = EventManager.getCurrentTime();
+                EventManager.Instance.Configuration.Instance.lastEventUnixTime = EventManager.getCurrentTime();
+                EventManager.Instance.Configuration.Save();
                 EventManager.Instance.resetSendNotifications();
                 UnturnedChat.Say(caller, EventManager.Instance.Translate("command_reset"), UnturnedChat.GetColorFromName(EventManager.Instance.Configuration.Instance.messageColor, Color.green));
                 return;

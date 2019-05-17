@@ -23,7 +23,7 @@ namespace Game4Freak.EventManager
     public class EventManager : RocketPlugin<EventManagerConfiguration>
     {
         public static EventManager Instance;
-        public const string VERSION = "0.2.0.0";
+        public const string VERSION = "0.3.0.0";
         private string newVersion = null;
         private bool notifyUpdate = false;
         private int frame = 10;
@@ -31,7 +31,10 @@ namespace Game4Freak.EventManager
         private List<bool> sendNotifications;
         private Event nextEvent;
 
-        private ExampleEvent example;
+        private bool countdownUIActive;
+
+        private ExampleEvent example_item;
+        private MessageEvent example_message;
 
         public delegate void onEventTriggeredHandler(Event @event);
         public static event onEventTriggeredHandler onEventTriggered;
@@ -69,12 +72,16 @@ namespace Game4Freak.EventManager
             resetSendNotifications();
             nextEvent = null;
 
+            countdownUIActive = false;
+
             onEventTriggered += onEventTrigger;
 
             U.Events.OnPlayerConnected += onPlayerConnection;
 
-            example = new ExampleEvent();
-            example.load();
+            example_item = new ExampleEvent();
+            example_item.load();
+            example_message = new MessageEvent();
+            example_message.load();
         }
 
         protected override void Unload()
@@ -83,7 +90,16 @@ namespace Game4Freak.EventManager
 
             U.Events.OnPlayerConnected -= onPlayerConnection;
 
-            example.unload();
+            example_item.unload();
+            example_message.unload();
+
+            if (Configuration.Instance.useUICountdown)
+            {
+                foreach (var sPlayer in Provider.clients)
+                {
+                    EffectManager.askEffectClearByID(9750, UnturnedPlayer.FromSteamPlayer(sPlayer).CSteamID);
+                }
+            }
         }
 
         public override TranslationList DefaultTranslations
@@ -113,7 +129,9 @@ namespace Game4Freak.EventManager
                     {"exampleevent_invalid_ids", "[{0}] There are no item ids to give away!" },
                     {"exampleevent_give_away", "[{0}] You got a free Item!" },
                     {"exampleevent_on_event_notification", "[{0}] Get yourself ready for a gift!" },
-                    {"exmapleevent_insufficient_players", "[{0}] There are not enough players on the server for this event!" }
+                    {"exmapleevent_insufficient_players", "[{0}] There are not enough players on the server for this event!" },
+                    {"countdown_message", "Next Event: {0}" },
+                    {"countdown_start", "Event Started!" }
                 };
             }
         }
@@ -135,6 +153,20 @@ namespace Game4Freak.EventManager
                 Configuration.Instance.lastEventUnixTime = getCurrentTime();
                 Configuration.Save();
                 return;
+            }
+
+            if (Configuration.Instance.useUICountdown)
+            {
+                if (!countdownUIActive && (int)(EventManager.Instance.Configuration.Instance.minutesBetweenEvents * 60 - (getCurrentTime() - Configuration.Instance.lastEventUnixTime)) <= Configuration.Instance.countdownStartMin * 60)
+                    countdownUIActive = true;
+
+                if (countdownUIActive)
+                {
+                    foreach (var sPlayer in Provider.clients)
+                    {
+                        EffectManager.sendUIEffect(9750, 0, true, formatCountdown());
+                    }
+                }
             }
 
             Int32 currentUnixTimestamp = getCurrentTime();
@@ -173,7 +205,16 @@ namespace Game4Freak.EventManager
 
         public void sendNextEvent()
         {
+            defineNextEvent();
             onEventTriggered(nextEvent);
+            if (Configuration.Instance.useUICountdown)
+            {
+                foreach (var sPlayer in Provider.clients)
+                {
+                    EffectManager.askEffectClearByID(9750, UnturnedPlayer.FromSteamPlayer(sPlayer).CSteamID);
+                }
+            }
+            countdownUIActive = false;
             Configuration.Instance.lastEventUnixTime = getCurrentTime();
             Configuration.Save();
             nextEvent = null;
@@ -240,6 +281,46 @@ namespace Game4Freak.EventManager
                     return true;
             }
             return false;
+        }
+
+        private string formatCountdown()
+        {
+            int timeLeft = (int)(EventManager.Instance.Configuration.Instance.minutesBetweenEvents * 60 - (getCurrentTime() - Configuration.Instance.lastEventUnixTime));
+            int[] times = { 0, 0, 0 };
+            string countdown = "";
+            if (timeLeft <= 1)
+            {
+                countdown = Translate("countdown_start");
+                return countdown;
+            }
+            while (timeLeft > 0)
+            {
+                if (timeLeft >= 3600)
+                {
+                    times[0]++;
+                    timeLeft = timeLeft - 3600;
+                }
+                else if (timeLeft >= 60)
+                {
+                    times[1]++;
+                    timeLeft = timeLeft - 60;
+                }
+                else
+                {
+                    times[2] = timeLeft;
+                    break;
+                }
+            }
+            for (int x = 0; x < times.Length; x++)
+            {
+                if (times[x] < 10)
+                    countdown = countdown + "0" + times[x];
+                else
+                    countdown = countdown + times[x];
+                if (x < 2)
+                    countdown = countdown + ":";
+            }
+            return Translate("countdown_message", countdown);
         }
 
         public EventType getEventTypeByID(string id)

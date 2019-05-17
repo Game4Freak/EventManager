@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandEvent.cs" />
+    <Compile Include="MessageEvent.cs" />
     <Compile Include="ExampleEvent.cs" />
     <Compile Include="EventType.cs" />
     <Compile Include="Event.cs" />

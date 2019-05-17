@@ -9,8 +9,11 @@ namespace Game4Freak.EventManager
     {
         public bool freeRandomItemEventPreNotification;
         public int freeRandomItemEventMinPlayers;
+        public string messageEventColor;
         public string messageColor;
         public bool useRandomEvents;
+        public bool useUICountdown;
+        public float countdownStartMin;
         public bool resetOnReload;
         public Int32 lastEventUnixTime;
         public float minutesBetweenEvents;
@@ -26,8 +29,11 @@ namespace Game4Freak.EventManager
         {
             freeRandomItemEventPreNotification = true;
             freeRandomItemEventMinPlayers = 2;
+            messageEventColor = "cyan";
             messageColor = "cyan";
             useRandomEvents = true;
+            useUICountdown = false;
+            countdownStartMin = 10;
             resetOnReload = true;
             lastEventUnixTime = EventManager.getCurrentTime();
             minutesBetweenEvents = 2;
