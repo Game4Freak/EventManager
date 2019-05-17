@@ -23,11 +23,10 @@ namespace Game4Freak.EventManager
     public class EventManager : RocketPlugin<EventManagerConfiguration>
     {
         public static EventManager Instance;
-        public const string VERSION = "0.1.2.0";
+        public const string VERSION = "0.2.0.0";
         private string newVersion = null;
         private bool notifyUpdate = false;
         private int frame = 10;
-        public Int32 lastUnixTimestamp;
         private int eventIndex;
         private List<bool> sendNotifications;
         private Event nextEvent;
@@ -61,8 +60,11 @@ namespace Game4Freak.EventManager
                     notifyUpdate = true;
                 }
             }
-
-            lastUnixTimestamp = getCurrentTime();
+            if (Configuration.Instance.resetOnReload)
+            {
+                Configuration.Instance.lastEventUnixTime = getCurrentTime();
+                Configuration.Save();
+            }
             eventIndex = 0;
             resetSendNotifications();
             nextEvent = null;
@@ -123,18 +125,21 @@ namespace Game4Freak.EventManager
 
             if (Configuration.Instance.events.Count == 0)
             {
-                lastUnixTimestamp = getCurrentTime();
+                Configuration.Instance.lastEventUnixTime = getCurrentTime();
+                Configuration.Save();
                 return;
             }
+            // change
             if (!serverHasMinClients())
             {
-                lastUnixTimestamp = getCurrentTime();
+                Configuration.Instance.lastEventUnixTime = getCurrentTime();
+                Configuration.Save();
                 return;
             }
 
             Int32 currentUnixTimestamp = getCurrentTime();
 
-            if (currentUnixTimestamp - lastUnixTimestamp >= Configuration.Instance.minutesBetweenEvents * 60)
+            if (currentUnixTimestamp - Configuration.Instance.lastEventUnixTime >= Configuration.Instance.minutesBetweenEvents * 60)
             {
                 sendNextEvent();
                 resetSendNotifications();
@@ -144,7 +149,7 @@ namespace Game4Freak.EventManager
             List<float> sortedNotifications = Configuration.Instance.minutesNotificationBefore.OrderBy(i => i).ToList();
             for (int i = 0; i < sortedNotifications.Count; i++)
             {
-                if (Configuration.Instance.minutesBetweenEvents * 60 - (currentUnixTimestamp - lastUnixTimestamp) <= sortedNotifications[i] * 60)
+                if (Configuration.Instance.minutesBetweenEvents * 60 - (currentUnixTimestamp - Configuration.Instance.lastEventUnixTime) <= sortedNotifications[i] * 60)
                 {
                     if (sendNotifications[i])
                         return;
@@ -169,7 +174,8 @@ namespace Game4Freak.EventManager
         public void sendNextEvent()
         {
             onEventTriggered(nextEvent);
-            lastUnixTimestamp = getCurrentTime();
+            Configuration.Instance.lastEventUnixTime = getCurrentTime();
+            Configuration.Save();
             nextEvent = null;
         }
 
