@@ -23,7 +23,7 @@ namespace Game4Freak.EventManager
     public class EventManager : RocketPlugin<EventManagerConfiguration>
     {
         public static EventManager Instance;
-        public const string VERSION = "0.3.0.0";
+        public const string VERSION = "0.3.1.0";
         private string newVersion = null;
         private bool notifyUpdate = false;
         private int frame = 10;
@@ -145,6 +145,13 @@ namespace Game4Freak.EventManager
             {
                 Configuration.Instance.lastEventUnixTime = getCurrentTime();
                 Configuration.Save();
+                if (Configuration.Instance.useUICountdown)
+                {
+                    foreach (var sPlayer in Provider.clients)
+                    {
+                        EffectManager.askEffectClearByID(9750, UnturnedPlayer.FromSteamPlayer(sPlayer).CSteamID);
+                    }
+                }
                 return;
             }
             // change
@@ -152,6 +159,13 @@ namespace Game4Freak.EventManager
             {
                 Configuration.Instance.lastEventUnixTime = getCurrentTime();
                 Configuration.Save();
+                if (Configuration.Instance.useUICountdown)
+                {
+                    foreach (var sPlayer in Provider.clients)
+                    {
+                        EffectManager.askEffectClearByID(9750, UnturnedPlayer.FromSteamPlayer(sPlayer).CSteamID);
+                    }
+                }
                 return;
             }
 
